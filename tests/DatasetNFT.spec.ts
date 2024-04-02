@@ -33,7 +33,6 @@ import {
 } from './utils/selectors';
 import { BASE_URI, DATASET_NFT_SUFFIX } from './utils/constants';
 import { SIGNER_ROLE } from 'utils/constants';
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 
 async function setup() {
   await deployments.fixture([
@@ -407,8 +406,7 @@ export default async function suite(): Promise<void> {
       const feeAmount = parseUnits('0.1', 18);
       const dsOwnerPercentage = parseUnits('0.001', 18);
 
-      await expect(
-        DatasetFactory_.connect(users_.datasetOwner).mintAndConfigureDataset(
+      const transaction = DatasetFactory_.connect(users_.datasetOwner).mintAndConfigureDataset(
           uuidHash,
           users_.datasetOwner.address,
           signedMessage,
@@ -419,11 +417,10 @@ export default async function suite(): Promise<void> {
           [ZeroHash],
           [parseUnits('1', 18)],
           false
-        )
-      )
-        .to.emit(DatasetNFT_, 'ManagersConfigChange')
+        );
+        (await transaction).wait();
+        await expect(transaction).to.emit(DatasetNFT_, 'ManagersConfigChange')
         .withArgs(dt_Id, await DatasetNFT_.distributionManager(dt_Id), await DatasetNFT_.subscriptionManager(dt_Id), await DatasetNFT_.verifierManager(dt_Id))
-        // .withArgs(dt_Id, anyValue, anyValue, anyValue)
         .to.emit(DatasetNFT_, 'Transfer')
         .withArgs(ZeroAddress, await DatasetFactory_.getAddress(), dt_Id)
         .to.emit(DatasetNFT_, 'Transfer')
@@ -1172,16 +1169,14 @@ export default async function suite(): Promise<void> {
           verifierManagerAddr
         );
 
-        await expect(
-          DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
+        const transaction = DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
             subscriptionManager: subscriptionManagerAddr,
             distributionManager: distributionManagerAddr,
             verifierManager: verifierManagerAddr,
-          })
-        )
-          .to.emit(DatasetNFT_, 'ManagersConfigChange')
-          .withArgs(datasetId_, await DatasetNFT_.distributionManager(datasetId_), await DatasetNFT_.subscriptionManager(datasetId_), await DatasetNFT_.verifierManager(datasetId_));
-          // .withArgs(datasetId_, anyValue, anyValue, anyValue);
+          });
+          (await transaction).wait();
+          await expect(transaction).to.emit(DatasetNFT_, 'ManagersConfigChange')
+          .withArgs(datasetId_, (await DatasetNFT_.proxies(datasetId_)).distributionManager, (await DatasetNFT_.proxies(datasetId_)).subscriptionManager, (await DatasetNFT_.proxies(datasetId_)).verifierManager);
       });
 
       it('Should revert set dataset nft managers if data set does not exists', async function () {
