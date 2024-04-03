@@ -407,19 +407,19 @@ export default async function suite(): Promise<void> {
       const dsOwnerPercentage = parseUnits('0.001', 18);
 
       const transaction = DatasetFactory_.connect(users_.datasetOwner).mintAndConfigureDataset(
-          uuidHash,
-          users_.datasetOwner.address,
-          signedMessage,
-          defaultVerifierAddress,
-          await users_.datasetOwner.Token!.getAddress(),
-          feeAmount,
-          dsOwnerPercentage,
-          [ZeroHash],
-          [parseUnits('1', 18)],
-          false
-        );
-        (await transaction).wait();
-        await expect(transaction).to.emit(DatasetNFT_, 'ManagersConfigChange')
+        uuidHash,
+        users_.datasetOwner.address,
+        signedMessage,
+        defaultVerifierAddress,
+        await users_.datasetOwner.Token!.getAddress(),
+        feeAmount,
+        dsOwnerPercentage,
+        [ZeroHash],
+        [parseUnits('1', 18)],
+        false
+      );
+      (await transaction).wait();
+      await expect(transaction).to.emit(DatasetNFT_, 'ManagersConfigChange')
         .withArgs(dt_Id, await DatasetNFT_.distributionManager(dt_Id), await DatasetNFT_.subscriptionManager(dt_Id), await DatasetNFT_.verifierManager(dt_Id))
         .to.emit(DatasetNFT_, 'Transfer')
         .withArgs(ZeroAddress, await DatasetFactory_.getAddress(), dt_Id)
@@ -1170,12 +1170,12 @@ export default async function suite(): Promise<void> {
         );
 
         const transaction = DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
-            subscriptionManager: subscriptionManagerAddr,
-            distributionManager: distributionManagerAddr,
-            verifierManager: verifierManagerAddr,
-          });
-          (await transaction).wait();
-          await expect(transaction).to.emit(DatasetNFT_, 'ManagersConfigChange')
+          subscriptionManager: subscriptionManagerAddr,
+          distributionManager: distributionManagerAddr,
+          verifierManager: verifierManagerAddr,
+        });
+        (await transaction).wait();
+        await expect(transaction).to.emit(DatasetNFT_, 'ManagersConfigChange')
           .withArgs(datasetId_, (await DatasetNFT_.proxies(datasetId_)).distributionManager, (await DatasetNFT_.proxies(datasetId_)).subscriptionManager, (await DatasetNFT_.proxies(datasetId_)).verifierManager);
       });
 
