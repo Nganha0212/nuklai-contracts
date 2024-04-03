@@ -753,8 +753,7 @@ export default async function suite(): Promise<void> {
             constants.DeployerFeeModel.DATASET_OWNER_STORAGE,
           ),
         ).to.be.revertedWith(
-          `AccessControl: account ${users_.datasetOwner.address.toLowerCase()} is missing role ${
-            constants.SIGNER_ROLE
+          `AccessControl: account ${users_.datasetOwner.address.toLowerCase()} is missing role ${constants.SIGNER_ROLE
           }`,
         );
       });
