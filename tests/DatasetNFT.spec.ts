@@ -87,8 +87,8 @@ const setupOnMint = async () => {
       network.config.chainId!,
       datasetAddress,
       uuidHash,
-      users.datasetOwner.address
-    )
+      users.datasetOwner.address,
+    ),
   );
 
   const testToken = await ethers.getContract('TestToken');
@@ -114,14 +114,14 @@ const setupOnMint = async () => {
       dsOwnerPercentage,
       [ZeroHash],
       [parseUnits('1', 18)],
-      false
+      false,
     )
   ).wait();
 
   const [from, to, datasetId] = getEvent(
     'Transfer',
     mintAndConfigureDatasetReceipt?.logs!,
-    DatasetNFT
+    DatasetNFT,
   )!.args as unknown as [string, string, bigint];
 
   const factories = {
@@ -135,7 +135,7 @@ const setupOnMint = async () => {
   const fragmentAddress = await DatasetNFT.fragments(datasetId);
   const DatasetFragment = (await ethers.getContractAt(
     'FragmentNFT',
-    fragmentAddress
+    fragmentAddress,
   )) as unknown as FragmentNFT;
 
   return {
@@ -184,7 +184,7 @@ export default async function suite(): Promise<void> {
 
     it('Should dataset fragment implementation be set on deploy', async function () {
       expect(await DatasetNFT_.fragmentImplementation()).to.equal(
-        await FragmentNFTImplementation_.getAddress()
+        await FragmentNFTImplementation_.getAddress(),
       );
     });
 
@@ -206,7 +206,7 @@ export default async function suite(): Promise<void> {
 
     it('Should revert to set dataset factory address if zero address', async function () {
       await expect(
-        DatasetNFT_.connect(users_.dtAdmin).setDatasetFactory(ZeroAddress)
+        DatasetNFT_.connect(users_.dtAdmin).setDatasetFactory(ZeroAddress),
       ).to.be.revertedWithCustomError(DatasetNFT_, 'DATASET_FACTORY_ZERO_ADDRESS');
     });
 
@@ -245,15 +245,15 @@ export default async function suite(): Promise<void> {
 
     it('Should revert if non admin account tries to set deployer fee beneficiary address', async () => {
       await expect(
-        DatasetNFT_.connect(users_.user).setDeployerFeeBeneficiary(users_.user.address)
+        DatasetNFT_.connect(users_.user).setDeployerFeeBeneficiary(users_.user.address),
       ).to.be.revertedWith(
-        `AccessControl: account ${users_.user.address.toLowerCase()} is missing role ${ZeroHash}`
+        `AccessControl: account ${users_.user.address.toLowerCase()} is missing role ${ZeroHash}`,
       );
     });
 
     it('Should setDeployerFeeBeneficiary() revert if trying to set zeroAddress as the beneficiary', async () => {
       await expect(
-        DatasetNFT_.connect(users_.dtAdmin).setDeployerFeeBeneficiary(ZeroAddress)
+        DatasetNFT_.connect(users_.dtAdmin).setDeployerFeeBeneficiary(ZeroAddress),
       ).to.be.revertedWithCustomError(DatasetNFT_, 'ZERO_ADDRESS');
     });
 
@@ -269,8 +269,8 @@ export default async function suite(): Promise<void> {
             constants.DeployerFeeModel.DEPLOYER_STORAGE,
             constants.DeployerFeeModel.NO_FEE,
           ],
-          percentages
-        )
+          percentages,
+        ),
       ).to.be.revertedWithCustomError(DatasetNFT_, 'ARRAY_LENGTH_MISMATCH');
     });
 
@@ -284,8 +284,8 @@ export default async function suite(): Promise<void> {
             constants.DeployerFeeModel.DEPLOYER_STORAGE,
             constants.DeployerFeeModel.NO_FEE,
           ],
-          percentages
-        )
+          percentages,
+        ),
       ).to.be.revertedWithCustomError(DatasetNFT_, 'BENEFICIARY_ZERO_ADDRESS');
     });
 
@@ -294,14 +294,14 @@ export default async function suite(): Promise<void> {
 
       await expect(
         DatasetNFT_.connect(users_.dtAdmin).setFragmentProxyAdminAddress(
-          await ProxyAdmin.getAddress()
-        )
+          await ProxyAdmin.getAddress(),
+        ),
       ).to.not.be.reverted;
     });
 
     it('Should revert set proxy admin address if it is not a contract', async function () {
       await expect(
-        DatasetNFT_.connect(users_.dtAdmin).setFragmentProxyAdminAddress(users_.user.address)
+        DatasetNFT_.connect(users_.dtAdmin).setFragmentProxyAdminAddress(users_.user.address),
       ).to.be.revertedWithCustomError(DatasetNFT_, 'FRAGMENT_PROXY_ADDRESS_INVALID');
     });
 
@@ -312,11 +312,11 @@ export default async function suite(): Promise<void> {
 
       await DatasetNFT_.connect(users_.dtAdmin).setDeployerFeeModelPercentages(
         [constants.DeployerFeeModel.DEPLOYER_STORAGE],
-        [percentage]
+        [percentage],
       );
 
       expect(
-        await DatasetNFT_.deployerFeeModelPercentage(constants.DeployerFeeModel.DEPLOYER_STORAGE)
+        await DatasetNFT_.deployerFeeModelPercentage(constants.DeployerFeeModel.DEPLOYER_STORAGE),
       ).to.equal(percentage);
     });
 
@@ -327,13 +327,13 @@ export default async function suite(): Promise<void> {
 
       await DatasetNFT_.connect(users_.dtAdmin).setDeployerFeeModelPercentages(
         [constants.DeployerFeeModel.DATASET_OWNER_STORAGE],
-        [percentage]
+        [percentage],
       );
 
       expect(
         await DatasetNFT_.deployerFeeModelPercentage(
-          constants.DeployerFeeModel.DATASET_OWNER_STORAGE
-        )
+          constants.DeployerFeeModel.DATASET_OWNER_STORAGE,
+        ),
       ).to.equal(percentage);
     });
 
@@ -346,8 +346,8 @@ export default async function suite(): Promise<void> {
       await expect(
         DatasetNFT_.connect(users_.dtAdmin).setDeployerFeeModelPercentages(
           [constants.DeployerFeeModel.DEPLOYER_STORAGE],
-          [percentage]
-        )
+          [percentage],
+        ),
       )
         .to.be.revertedWithCustomError(DatasetNFT_, 'PERCENTAGE_VALUE_INVALID')
         .withArgs(percentage100Percent, percentage);
@@ -359,22 +359,22 @@ export default async function suite(): Promise<void> {
       await expect(
         DatasetNFT_.connect(users_.user).setDeployerFeeModelPercentages(
           [constants.DeployerFeeModel.DATASET_OWNER_STORAGE],
-          [percentage]
-        )
+          [percentage],
+        ),
       ).to.be.revertedWith(
-        `AccessControl: account ${users_.user.address.toLowerCase()} is missing role ${ZeroHash}`
+        `AccessControl: account ${users_.user.address.toLowerCase()} is missing role ${ZeroHash}`,
       );
     });
 
     it('Should fee model percentage NO_FEE be zero', async function () {
       expect(
-        await DatasetNFT_.deployerFeeModelPercentage(constants.DeployerFeeModel.NO_FEE)
+        await DatasetNFT_.deployerFeeModelPercentage(constants.DeployerFeeModel.NO_FEE),
       ).to.equal(0);
     });
 
     it('Should revert if someone tries to re-initialize contract', async function () {
       await expect(DatasetNFT_.initialize(users_.dtAdmin.address, ZeroAddress)).to.be.revertedWith(
-        'Initializable: contract is already initialized'
+        'Initializable: contract is already initialized',
       );
     });
 
@@ -391,8 +391,8 @@ export default async function suite(): Promise<void> {
           network.config.chainId!,
           datasetAddress,
           uuidHash,
-          users_.datasetOwner.address
-        )
+          users_.datasetOwner.address,
+        ),
       );
 
       const testToken = await ethers.getContract('TestToken');
@@ -416,11 +416,17 @@ export default async function suite(): Promise<void> {
         dsOwnerPercentage,
         [ZeroHash],
         [parseUnits('1', 18)],
-        false
+        false,
       );
       (await transaction).wait();
-      await expect(transaction).to.emit(DatasetNFT_, 'ManagersConfigChange')
-        .withArgs(dt_Id, await DatasetNFT_.distributionManager(dt_Id), await DatasetNFT_.subscriptionManager(dt_Id), await DatasetNFT_.verifierManager(dt_Id))
+      await expect(transaction)
+        .to.emit(DatasetNFT_, 'ManagersConfigChange')
+        .withArgs(
+          dt_Id,
+          await DatasetNFT_.distributionManager(dt_Id),
+          await DatasetNFT_.subscriptionManager(dt_Id),
+          await DatasetNFT_.verifierManager(dt_Id),
+        )
         .to.emit(DatasetNFT_, 'Transfer')
         .withArgs(ZeroAddress, await DatasetFactory_.getAddress(), dt_Id)
         .to.emit(DatasetNFT_, 'Transfer')
@@ -449,12 +455,12 @@ export default async function suite(): Promise<void> {
 
       const DatasetNFT = (await ethers.getContractAt(
         'DatasetNFT',
-        deployedDatasetNFT.address
+        deployedDatasetNFT.address,
       )) as unknown as DatasetNFT;
 
       await DatasetNFT.connect(users_.dtAdmin).grantRole(
         constants.SIGNER_ROLE,
-        users_.dtAdmin.address
+        users_.dtAdmin.address,
       );
 
       const datasetUUID = uuidv4();
@@ -468,8 +474,8 @@ export default async function suite(): Promise<void> {
           network.config.chainId!,
           deployedDatasetNFT.address,
           uuidHash,
-          users_.datasetOwner.address
-        )
+          users_.datasetOwner.address,
+        ),
       );
 
       const testToken = await ethers.getContract('TestToken');
@@ -477,7 +483,7 @@ export default async function suite(): Promise<void> {
 
       await DatasetNFT.connect(users_.dtAdmin).grantRole(
         constants.APPROVED_TOKEN_ROLE,
-        testTokenAddress
+        testTokenAddress,
       );
 
       const defaultVerifierAddress = await (
@@ -494,7 +500,7 @@ export default async function suite(): Promise<void> {
         deployedDatasetNFT.address,
         await subscriptionManager.getAddress(),
         await distributionManager.getAddress(),
-        await verifierManager.getAddress()
+        await verifierManager.getAddress(),
       );
 
       await expect(
@@ -508,8 +514,8 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          false
-        )
+          false,
+        ),
       ).to.be.revertedWithCustomError(DatasetNFT_, 'DATASET_FACTORY_ZERO_ADDRESS');
     });
 
@@ -524,8 +530,8 @@ export default async function suite(): Promise<void> {
           network.config.chainId!,
           datasetAddress,
           uuidHash,
-          users_.datasetOwner.address
-        )
+          users_.datasetOwner.address,
+        ),
       );
 
       const testToken = await ethers.getContract('TestToken');
@@ -549,7 +555,7 @@ export default async function suite(): Promise<void> {
         dsOwnerPercentage,
         [ZeroHash],
         [parseUnits('1', 18)],
-        false
+        false,
       );
 
       // Same uuidHash used --> should revert since the same tokenId (uint256(uuidHash)) cannot be minted again
@@ -564,8 +570,8 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          false
-        )
+          false,
+        ),
       ).to.be.revertedWith('ERC721: token already minted');
     });
 
@@ -593,8 +599,8 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          false
-        )
+          false,
+        ),
       ).to.be.revertedWithCustomError(DatasetNFT_, 'BAD_SIGNATURE');
     });
 
@@ -609,8 +615,8 @@ export default async function suite(): Promise<void> {
           network.config.chainId!,
           datasetAddress,
           uuidHash,
-          users_.datasetOwner.address
-        )
+          users_.datasetOwner.address,
+        ),
       );
       const defaultVerifierAddress = await (
         await ethers.getContract('AcceptManuallyVerifier')
@@ -629,8 +635,8 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          false
-        )
+          false,
+        ),
       ).to.be.revertedWithCustomError(DatasetNFT_, 'BAD_SIGNATURE');
     });
 
@@ -641,11 +647,11 @@ export default async function suite(): Promise<void> {
       });
 
       await DatasetNFT_.connect(users_.dtAdmin).setFragmentImplementation(
-        newFragmentImplementation.address
+        newFragmentImplementation.address,
       );
 
       expect(await DatasetNFT_.fragmentImplementation()).to.equal(
-        newFragmentImplementation.address
+        newFragmentImplementation.address,
       );
     });
 
@@ -657,16 +663,16 @@ export default async function suite(): Promise<void> {
 
       await expect(
         DatasetNFT_.connect(users_.user).setFragmentImplementation(
-          newFragmentImplementation.address
-        )
+          newFragmentImplementation.address,
+        ),
       ).to.be.revertedWith(
-        `AccessControl: account ${users_.user.address.toLowerCase()} is missing role ${ZeroHash}`
+        `AccessControl: account ${users_.user.address.toLowerCase()} is missing role ${ZeroHash}`,
       );
     });
 
     it('Should revert on set fragment implementation if address is a wallet', async function () {
       await expect(
-        DatasetNFT_.connect(users_.dtAdmin).setFragmentImplementation(users_.user.address)
+        DatasetNFT_.connect(users_.dtAdmin).setFragmentImplementation(users_.user.address),
       )
         .to.be.revertedWithCustomError(DatasetNFT_, 'FRAGMENT_IMPLEMENTATION_INVALID')
         .withArgs(users_.user.address);
@@ -736,7 +742,7 @@ export default async function suite(): Promise<void> {
 
       it('Should get deployer fee percentage by dataset id', async () => {
         expect(
-          await DatasetNFT_.connect(users_.datasetOwner).deployerFeePercentage(datasetId_)
+          await DatasetNFT_.connect(users_.datasetOwner).deployerFeePercentage(datasetId_),
         ).to.be.equal(0);
       });
 
@@ -744,11 +750,12 @@ export default async function suite(): Promise<void> {
         await expect(
           DatasetNFT_.connect(users_.datasetOwner).setDeployerFeeModel(
             datasetId_,
-            constants.DeployerFeeModel.DATASET_OWNER_STORAGE
-          )
+            constants.DeployerFeeModel.DATASET_OWNER_STORAGE,
+          ),
         ).to.be.revertedWith(
-          `AccessControl: account ${users_.datasetOwner.address.toLowerCase()} is missing role ${constants.SIGNER_ROLE
-          }`
+          `AccessControl: account ${users_.datasetOwner.address.toLowerCase()} is missing role ${
+            constants.SIGNER_ROLE
+          }`,
         );
       });
 
@@ -776,7 +783,7 @@ export default async function suite(): Promise<void> {
         await DatasetNFT_.connect(users_.dtAdmin).setBaseURI(BASE_URI);
 
         expect(await DatasetNFT_.tokenURI(datasetId_)).to.equal(
-          BASE_URI + DATASET_NFT_SUFFIX + '/' + datasetId_
+          BASE_URI + DATASET_NFT_SUFFIX + '/' + datasetId_,
         );
       });
 
@@ -794,36 +801,36 @@ export default async function suite(): Promise<void> {
       it('Should DT admin set deployer fee model for a data set', async function () {
         await DatasetNFT_.connect(users_.dtAdmin).setDeployerFeeModel(
           datasetId_,
-          constants.DeployerFeeModel.DEPLOYER_STORAGE
+          constants.DeployerFeeModel.DEPLOYER_STORAGE,
         );
 
         expect(await DatasetNFT_.deployerFeeModels(datasetId_)).to.equal(
-          constants.DeployerFeeModel.DEPLOYER_STORAGE
+          constants.DeployerFeeModel.DEPLOYER_STORAGE,
         );
       });
 
       it('Should DT admin add managers to whitelist', async function () {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
 
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
 
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          await SubscriptionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          await DistributionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          await VerifierManager.getAddress(),
         );
 
         expect(await DatasetNFT_.isWhitelistedManager(await SubscriptionManager.getAddress())).to.be
@@ -847,8 +854,8 @@ export default async function suite(): Promise<void> {
             network.config.chainId!,
             await DatasetNFT_.getAddress(),
             uuidHash,
-            users_.datasetOwner.address
-          )
+            users_.datasetOwner.address,
+          ),
         );
 
         const defaultVerifierAddress = await (
@@ -867,17 +874,17 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          false
+          false,
         );
 
         // Now datasetOwner should be the owner of 2nd dataSetNFT
         expect(await DatasetNFT_.ownerOf(expected_2nd_DataSetId)).to.equal(
-          users_.datasetOwner.address
+          users_.datasetOwner.address,
         );
 
         // 2nd Dataset NFT owner should not be able to deploy the fragment instance if already called mintAndConfigureDataset()
         await expect(
-          DatasetNFT_.connect(users_.datasetOwner).deployFragmentInstance(expected_2nd_DataSetId)
+          DatasetNFT_.connect(users_.datasetOwner).deployFragmentInstance(expected_2nd_DataSetId),
         ).to.be.revertedWithCustomError(DatasetNFT_, 'FRAGMENT_INSTANCE_ALREADY_DEPLOYED');
 
         // Admin sets fragment implementation to zeroAddress, thus disabling the creation of fragment instances
@@ -887,7 +894,7 @@ export default async function suite(): Promise<void> {
         // 2nd Dataset NFT owner tries to deploy the fragment instance of his dataset
         // Should fail since it is currently disabled by admin
         await expect(
-          DatasetNFT_.connect(users_.datasetOwner).deployFragmentInstance(expected_2nd_DataSetId)
+          DatasetNFT_.connect(users_.datasetOwner).deployFragmentInstance(expected_2nd_DataSetId),
         ).to.be.revertedWithCustomError(DatasetNFT_, 'FRAGMENT_CREATION_DISABLED');
       });
 
@@ -904,8 +911,8 @@ export default async function suite(): Promise<void> {
             network.config.chainId!,
             await DatasetNFT_.getAddress(),
             uuidHash,
-            users_.datasetOwner.address
-          )
+            users_.datasetOwner.address,
+          ),
         );
 
         const defaultVerifierAddress = await (
@@ -924,7 +931,7 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          false
+          false,
         );
 
         // Now datasetOwner should be the owner of 2nd dataSetNFT
@@ -937,30 +944,30 @@ export default async function suite(): Promise<void> {
 
       it('Should revert when token owner tries to set managers to the zeroAddress', async () => {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
 
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
 
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          await SubscriptionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          await DistributionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          await VerifierManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          ZeroAddress
+          ZeroAddress,
         );
 
         const subscriptionManagerAddr = await SubscriptionManager.getAddress();
@@ -985,25 +992,25 @@ export default async function suite(): Promise<void> {
         };
 
         await expect(
-          DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, config1)
+          DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, config1),
         ).to.be.revertedWithCustomError(DatasetNFT_, 'MANAGER_ZERO_ADDRESS');
 
         await expect(
-          DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, config2)
+          DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, config2),
         ).to.be.revertedWithCustomError(DatasetNFT_, 'MANAGER_ZERO_ADDRESS');
 
         await expect(
-          DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, config3)
+          DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, config3),
         ).to.be.revertedWithCustomError(DatasetNFT_, 'MANAGER_ZERO_ADDRESS');
       });
 
       it('Should revert when data set owner tries to set managers with invalid interface id', async () => {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
 
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
 
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
@@ -1014,15 +1021,15 @@ export default async function suite(): Promise<void> {
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          await SubscriptionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          await DistributionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          await VerifierManager.getAddress(),
         );
 
         // ManagersConfig :: {subscription, distribution, verifier}
@@ -1068,11 +1075,11 @@ export default async function suite(): Promise<void> {
 
       it('Should revert when data set owner tries to set non-whitelisted managers', async () => {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
 
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
 
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
@@ -1094,7 +1101,7 @@ export default async function suite(): Promise<void> {
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          await DistributionManager.getAddress(),
         );
 
         await expect(DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, config))
@@ -1103,7 +1110,7 @@ export default async function suite(): Promise<void> {
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          await SubscriptionManager.getAddress(),
         );
 
         await expect(DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, config))
@@ -1112,7 +1119,7 @@ export default async function suite(): Promise<void> {
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          await VerifierManager.getAddress(),
         );
 
         await expect(DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, config)).to
@@ -1133,22 +1140,22 @@ export default async function suite(): Promise<void> {
         };
 
         await expect(
-          DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, sameConfig)
+          DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, sameConfig),
         ).to.not.emit(DatasetNFT_, 'ManagersConfigChange');
       });
 
       it('Should data set owner not deploy fragment instance if already exists', async function () {
         await expect(
-          DatasetNFT_.connect(users_.datasetOwner).deployFragmentInstance(datasetId_)
+          DatasetNFT_.connect(users_.datasetOwner).deployFragmentInstance(datasetId_),
         ).to.be.revertedWithCustomError(DatasetNFT_, 'FRAGMENT_INSTANCE_ALREADY_DEPLOYED');
       });
 
       it('Should data set owner set managers', async function () {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
@@ -1158,15 +1165,15 @@ export default async function suite(): Promise<void> {
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          subscriptionManagerAddr
+          subscriptionManagerAddr,
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          distributionManagerAddr
+          distributionManagerAddr,
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          verifierManagerAddr
+          verifierManagerAddr,
         );
 
         const transaction = DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
@@ -1175,18 +1182,24 @@ export default async function suite(): Promise<void> {
           verifierManager: verifierManagerAddr,
         });
         (await transaction).wait();
-        await expect(transaction).to.emit(DatasetNFT_, 'ManagersConfigChange')
-          .withArgs(datasetId_, (await DatasetNFT_.proxies(datasetId_)).distributionManager, (await DatasetNFT_.proxies(datasetId_)).subscriptionManager, (await DatasetNFT_.proxies(datasetId_)).verifierManager);
+        await expect(transaction)
+          .to.emit(DatasetNFT_, 'ManagersConfigChange')
+          .withArgs(
+            datasetId_,
+            (await DatasetNFT_.proxies(datasetId_)).distributionManager,
+            (await DatasetNFT_.proxies(datasetId_)).subscriptionManager,
+            (await DatasetNFT_.proxies(datasetId_)).verifierManager,
+          );
       });
 
       it('Should revert set dataset nft managers if data set does not exists', async function () {
         const wrongDatasetId = 11231231;
 
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
@@ -1195,7 +1208,7 @@ export default async function suite(): Promise<void> {
             subscriptionManager: await SubscriptionManager.getAddress(),
             distributionManager: await DistributionManager.getAddress(),
             verifierManager: await VerifierManager.getAddress(),
-          })
+          }),
         )
           .to.be.revertedWithCustomError(DatasetNFT_, 'NOT_OWNER')
           .withArgs(wrongDatasetId, users_.datasetOwner.address);
@@ -1203,24 +1216,24 @@ export default async function suite(): Promise<void> {
 
       it('Should contributor propose a fragment - default AcceptManuallyVerifier', async function () {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          await SubscriptionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          await DistributionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          await VerifierManager.getAddress(),
         );
 
         await DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
@@ -1234,11 +1247,11 @@ export default async function suite(): Promise<void> {
         const DatasetVerifierManager = await ethers.getContractAt(
           'VerifierManager',
           datasetVerifierManagerAddress,
-          users_.datasetOwner
+          users_.datasetOwner,
         );
 
         const AcceptManuallyVerifier = await AcceptManuallyVerifierFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy(await DatasetNFT_.getAddress());
 
         DatasetVerifierManager.setDefaultVerifier(await AcceptManuallyVerifier.getAddress());
@@ -1254,8 +1267,8 @@ export default async function suite(): Promise<void> {
             datasetId_,
             lastFragmentPendingId + 1n,
             users_.contributor.address,
-            tag
-          )
+            tag,
+          ),
         );
 
         await expect(
@@ -1263,8 +1276,8 @@ export default async function suite(): Promise<void> {
             datasetId_,
             users_.contributor.address,
             tag,
-            proposeSignature
-          )
+            proposeSignature,
+          ),
         )
           .to.emit(DatasetFragment_, 'FragmentPending')
           .withArgs(lastFragmentPendingId + 1n, tag);
@@ -1272,24 +1285,24 @@ export default async function suite(): Promise<void> {
 
       it('Should data set owner to be exempt when adding a fragment - default AcceptManuallyVerifier', async function () {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          await SubscriptionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          await DistributionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          await VerifierManager.getAddress(),
         );
 
         await DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
@@ -1303,11 +1316,11 @@ export default async function suite(): Promise<void> {
         const DatasetVerifierManager = await ethers.getContractAt(
           'VerifierManager',
           datasetVerifierManagerAddress,
-          users_.datasetOwner
+          users_.datasetOwner,
         );
 
         const AcceptManuallyVerifier = await AcceptManuallyVerifierFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy(await DatasetNFT_.getAddress());
 
         await DatasetVerifierManager.setDefaultVerifier(await AcceptManuallyVerifier.getAddress());
@@ -1323,8 +1336,8 @@ export default async function suite(): Promise<void> {
             datasetId_,
             lastFragmentPendingId + 1n,
             users_.datasetOwner.address,
-            tag
-          )
+            tag,
+          ),
         );
 
         await expect(
@@ -1332,8 +1345,8 @@ export default async function suite(): Promise<void> {
             datasetId_,
             users_.datasetOwner.address,
             tag,
-            proposeSignature
-          )
+            proposeSignature,
+          ),
         )
           .to.emit(DatasetFragment_, 'FragmentPending')
           .withArgs(lastFragmentPendingId + 1n, tag)
@@ -1356,8 +1369,8 @@ export default async function suite(): Promise<void> {
             datasetId_,
             lastFragmentPendingId + 1n,
             ZeroAddress,
-            tag
-          )
+            tag,
+          ),
         );
 
         await expect(
@@ -1365,15 +1378,15 @@ export default async function suite(): Promise<void> {
             datasetId_,
             ZeroAddress,
             tag,
-            proposeSignature
-          )
+            proposeSignature,
+          ),
         ).to.be.revertedWithCustomError(DatasetFragment_, 'ZERO_ADDRESS');
       });
 
       it('Should proposeFragment() revert if no FragmentInstance for dataset is deployed', async () => {
         // Currently only one dataSet is supported from the protocol  with `datasetId_` erc721 id
         await expect(DatasetNFT_.ownerOf(datasetId_ + BigInt(1))).to.be.revertedWith(
-          'ERC721: invalid token ID'
+          'ERC721: invalid token ID',
         );
         expect(await DatasetNFT_.fragments(datasetId_ + BigInt(1))).to.equal(ZeroAddress);
 
@@ -1387,15 +1400,15 @@ export default async function suite(): Promise<void> {
             nonExistentDatasetId,
             users_.contributor.address,
             tag,
-            signatureMock
-          )
+            signatureMock,
+          ),
         ).to.be.revertedWithCustomError(DatasetNFT_, 'FRAGMENT_INSTANCE_NOT_DEPLOYED');
       });
 
       it('Should proposeManyFragments() revert if no FragmentInstance for dataset is deployed', async () => {
         // Currently only one dataSet is supported from the protocol  with `datasetId_` erc721 id
         await expect(DatasetNFT_.ownerOf(datasetId_ + BigInt(1))).to.be.revertedWith(
-          'ERC721: invalid token ID'
+          'ERC721: invalid token ID',
         );
         expect(await DatasetNFT_.fragments(datasetId_ + BigInt(1))).to.equal(ZeroAddress);
 
@@ -1409,31 +1422,31 @@ export default async function suite(): Promise<void> {
             nonExistentDatasetId,
             [users_.contributor, users_.contributor],
             tags,
-            signatureMock
-          )
+            signatureMock,
+          ),
         ).to.be.revertedWithCustomError(DatasetNFT_, 'FRAGMENT_INSTANCE_NOT_DEPLOYED');
       });
 
       it('Should contributor propose multiple fragments - default AcceptManuallyVerifier', async function () {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          await SubscriptionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          await DistributionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          await VerifierManager.getAddress(),
         );
 
         await DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
@@ -1447,11 +1460,11 @@ export default async function suite(): Promise<void> {
         const DatasetVerifierManager = await ethers.getContractAt(
           'VerifierManager',
           datasetVerifierManagerAddress,
-          users_.datasetOwner
+          users_.datasetOwner,
         );
 
         const AcceptManuallyVerifier = await AcceptManuallyVerifierFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy(await DatasetNFT_.getAddress());
 
         DatasetVerifierManager.setDefaultVerifier(await AcceptManuallyVerifier.getAddress());
@@ -1472,8 +1485,8 @@ export default async function suite(): Promise<void> {
             lastFragmentPendingId + 1n,
             lastFragmentPendingId + BigInt(tags.length),
             [users_.contributor.address, users_.contributor.address, users_.contributor.address],
-            tags
-          )
+            tags,
+          ),
         );
 
         await expect(
@@ -1481,8 +1494,8 @@ export default async function suite(): Promise<void> {
             datasetId_,
             [users_.contributor.address, users_.contributor.address, users_.contributor.address],
             [tagSchemas, tagRows, tagData],
-            proposeManySignature
-          )
+            proposeManySignature,
+          ),
         )
           .to.emit(DatasetFragment_, 'FragmentPending')
           .withArgs(lastFragmentPendingId + 1n, tagSchemas)
@@ -1509,8 +1522,8 @@ export default async function suite(): Promise<void> {
             lastFragmentPendingId + 1n,
             lastFragmentPendingId + BigInt(tags.length),
             [users_.contributor.address, ZeroAddress, users_.contributor.address],
-            tags
-          )
+            tags,
+          ),
         );
 
         await expect(
@@ -1518,8 +1531,8 @@ export default async function suite(): Promise<void> {
             datasetId_,
             [users_.contributor.address, ZeroAddress, users_.contributor.address],
             tags,
-            proposeManySignature
-          )
+            proposeManySignature,
+          ),
         )
           .to.emit(DatasetFragment_, 'FragmentPending')
           .withArgs(lastFragmentPendingId + 1n, tagSchemas)
@@ -1530,24 +1543,24 @@ export default async function suite(): Promise<void> {
 
       it('Should revert contributor propose multiple fragments if proposes length is not correct', async function () {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          await SubscriptionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          await DistributionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          await VerifierManager.getAddress(),
         );
 
         await DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
@@ -1561,11 +1574,11 @@ export default async function suite(): Promise<void> {
         const DatasetVerifierManager = await ethers.getContractAt(
           'VerifierManager',
           datasetVerifierManagerAddress,
-          users_.datasetOwner
+          users_.datasetOwner,
         );
 
         const AcceptManuallyVerifier = await AcceptManuallyVerifierFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy(await DatasetNFT_.getAddress());
 
         DatasetVerifierManager.setDefaultVerifier(await AcceptManuallyVerifier.getAddress());
@@ -1586,8 +1599,8 @@ export default async function suite(): Promise<void> {
             lastFragmentPendingId + 1n,
             lastFragmentPendingId + BigInt(tags.length),
             [users_.contributor.address, users_.contributor.address, users_.contributor.address],
-            tags
-          )
+            tags,
+          ),
         );
 
         await expect(
@@ -1595,31 +1608,31 @@ export default async function suite(): Promise<void> {
             datasetId_,
             [users_.contributor.address, users_.contributor.address],
             [tagSchemas],
-            proposeManySignature
-          )
+            proposeManySignature,
+          ),
         ).to.be.revertedWithCustomError(DatasetNFT_, 'ARRAY_LENGTH_MISMATCH');
       });
 
       it('Should contributor propose a fragment - default AcceptAllVerifier', async function () {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          await SubscriptionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          await DistributionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          await VerifierManager.getAddress(),
         );
 
         await DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
@@ -1633,11 +1646,11 @@ export default async function suite(): Promise<void> {
         const DatasetVerifierManager = await ethers.getContractAt(
           'VerifierManager',
           datasetVerifierManagerAddress,
-          users_.datasetOwner
+          users_.datasetOwner,
         );
 
         const AcceptAllVerifier = await AcceptAllVerifierFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
 
         DatasetVerifierManager.setDefaultVerifier(await AcceptAllVerifier.getAddress());
@@ -1653,8 +1666,8 @@ export default async function suite(): Promise<void> {
             datasetId_,
             lastFragmentPendingId + 1n,
             users_.contributor.address,
-            tag
-          )
+            tag,
+          ),
         );
 
         await expect(
@@ -1662,8 +1675,8 @@ export default async function suite(): Promise<void> {
             datasetId_,
             users_.contributor.address,
             tag,
-            proposeSignature
-          )
+            proposeSignature,
+          ),
         )
           .to.emit(DatasetFragment_, 'FragmentPending')
           .withArgs(lastFragmentPendingId + 1n, tag);
@@ -1671,24 +1684,24 @@ export default async function suite(): Promise<void> {
 
       it('Should revert a propose if signature is wrong', async function () {
         const SubscriptionManager = await ERC20SubscriptionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const DistributionManager = await DistributionManagerFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy();
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          await SubscriptionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          await DistributionManager.getAddress(),
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          await VerifierManager.getAddress(),
         );
 
         await DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
@@ -1702,11 +1715,11 @@ export default async function suite(): Promise<void> {
         const DatasetVerifierManager = await ethers.getContractAt(
           'VerifierManager',
           datasetVerifierManagerAddress,
-          users_.datasetOwner
+          users_.datasetOwner,
         );
 
         const AcceptManuallyVerifier = await AcceptManuallyVerifierFactory_.connect(
-          users_.datasetOwner
+          users_.datasetOwner,
         ).deploy(await DatasetNFT_.getAddress());
 
         DatasetVerifierManager.setDefaultVerifier(await AcceptManuallyVerifier.getAddress());
@@ -1720,8 +1733,8 @@ export default async function suite(): Promise<void> {
             datasetId_,
             users_.contributor.address,
             tag,
-            proposeSignature
-          )
+            proposeSignature,
+          ),
         ).to.be.revertedWithCustomError(DatasetNFT_, 'BAD_SIGNATURE');
       });
 
@@ -1737,8 +1750,8 @@ export default async function suite(): Promise<void> {
             network.config.chainId!,
             datasetAddress,
             uuidHash,
-            users_.datasetOwner.address
-          )
+            users_.datasetOwner.address,
+          ),
         );
 
         const testToken = await ethers.getContract('TestToken');
@@ -1748,7 +1761,7 @@ export default async function suite(): Promise<void> {
 
         const extraFeePerPendingFragment = parseUnits('0.05');
         await DatasetNFT_.connect(users_.dtAdmin).setExtraFeePerPendingFragment(
-          extraFeePerPendingFragment
+          extraFeePerPendingFragment,
         );
 
         const defaultVerifierAddress = await (
@@ -1767,13 +1780,13 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          true
+          true,
         );
 
         const fragmentAddress = await DatasetNFT_.fragments(datasetId);
         const DatasetFragment = (await ethers.getContractAt(
           'FragmentNFT',
-          fragmentAddress
+          fragmentAddress,
         )) as unknown as FragmentNFT;
 
         const tag = utils.encodeTag('dataset.schemas');
@@ -1785,8 +1798,8 @@ export default async function suite(): Promise<void> {
             datasetId,
             lastFragmentPendingId + 1n,
             users_.contributor.address,
-            tag
-          )
+            tag,
+          ),
         );
 
         await expect(
@@ -1795,8 +1808,8 @@ export default async function suite(): Promise<void> {
             users_.contributor.address,
             tag,
             proposeSignature,
-            { value: extraFeePerPendingFragment }
-          )
+            { value: extraFeePerPendingFragment },
+          ),
         )
           .to.emit(DatasetFragment, 'FragmentPending')
           .withArgs(lastFragmentPendingId + 1n, tag)
@@ -1816,8 +1829,8 @@ export default async function suite(): Promise<void> {
             network.config.chainId!,
             datasetAddress,
             uuidHash,
-            users_.datasetOwner.address
-          )
+            users_.datasetOwner.address,
+          ),
         );
 
         await DatasetNFT_.connect(users_.dtAdmin).setExtraFeePerPendingFragment(0n);
@@ -1843,13 +1856,13 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          true
+          true,
         );
 
         const fragmentAddress = await DatasetNFT_.fragments(datasetId);
         const DatasetFragment = (await ethers.getContractAt(
           'FragmentNFT',
-          fragmentAddress
+          fragmentAddress,
         )) as unknown as FragmentNFT;
 
         const tag = utils.encodeTag('dataset.schemas');
@@ -1861,8 +1874,8 @@ export default async function suite(): Promise<void> {
             datasetId,
             lastFragmentPendingId + 1n,
             users_.contributor.address,
-            tag
-          )
+            tag,
+          ),
         );
 
         await expect(
@@ -1870,8 +1883,8 @@ export default async function suite(): Promise<void> {
             datasetId,
             users_.contributor.address,
             tag,
-            proposeSignature
-          )
+            proposeSignature,
+          ),
         )
           .to.emit(DatasetFragment, 'FragmentPending')
           .withArgs(lastFragmentPendingId + 1n, tag)
@@ -1890,8 +1903,8 @@ export default async function suite(): Promise<void> {
             network.config.chainId!,
             datasetAddress,
             uuidHash,
-            users_.datasetOwner.address
-          )
+            users_.datasetOwner.address,
+          ),
         );
 
         await DatasetNFT_.connect(users_.dtAdmin).setExtraFeePerPendingFragment(parseUnits('0.05'));
@@ -1917,13 +1930,13 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          false
+          false,
         );
 
         const fragmentAddress = await DatasetNFT_.fragments(datasetId);
         const DatasetFragment = (await ethers.getContractAt(
           'FragmentNFT',
-          fragmentAddress
+          fragmentAddress,
         )) as unknown as FragmentNFT;
 
         const tag = utils.encodeTag('dataset.schemas');
@@ -1935,8 +1948,8 @@ export default async function suite(): Promise<void> {
             datasetId,
             lastFragmentPendingId + 1n,
             users_.contributor.address,
-            tag
-          )
+            tag,
+          ),
         );
 
         await expect(
@@ -1944,8 +1957,8 @@ export default async function suite(): Promise<void> {
             datasetId,
             users_.contributor.address,
             tag,
-            proposeSignature
-          )
+            proposeSignature,
+          ),
         )
           .to.emit(DatasetFragment, 'FragmentPending')
           .withArgs(lastFragmentPendingId + 1n, tag)
@@ -1964,13 +1977,13 @@ export default async function suite(): Promise<void> {
             network.config.chainId!,
             datasetAddress,
             uuidHash,
-            users_.datasetOwner.address
-          )
+            users_.datasetOwner.address,
+          ),
         );
 
         const extraFeePerPendingFragment = parseUnits('0.05');
         await DatasetNFT_.connect(users_.dtAdmin).setExtraFeePerPendingFragment(
-          extraFeePerPendingFragment
+          extraFeePerPendingFragment,
         );
 
         const testToken = await ethers.getContract('TestToken');
@@ -1994,13 +2007,13 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          true
+          true,
         );
 
         const fragmentAddress = await DatasetNFT_.fragments(datasetId);
         const DatasetFragment = (await ethers.getContractAt(
           'FragmentNFT',
-          fragmentAddress
+          fragmentAddress,
         )) as unknown as FragmentNFT;
 
         const tag = utils.encodeTag('dataset.schemas');
@@ -2012,8 +2025,8 @@ export default async function suite(): Promise<void> {
             datasetId,
             lastFragmentPendingId + 1n,
             users_.contributor.address,
-            tag
-          )
+            tag,
+          ),
         );
 
         await expect(
@@ -2022,8 +2035,8 @@ export default async function suite(): Promise<void> {
             users_.contributor.address,
             tag,
             proposeSignature,
-            { value: extraFeePerPendingFragment + 1n }
-          )
+            { value: extraFeePerPendingFragment + 1n },
+          ),
         )
           .to.be.revertedWithCustomError(DatasetNFT_, 'FRAGMENT_EXTRA_FEE_INVALID')
           .withArgs(extraFeePerPendingFragment, extraFeePerPendingFragment + 1n);
@@ -2041,13 +2054,13 @@ export default async function suite(): Promise<void> {
             network.config.chainId!,
             datasetAddress,
             uuidHash,
-            users_.datasetOwner.address
-          )
+            users_.datasetOwner.address,
+          ),
         );
 
         const extraFeePerPendingFragment = parseUnits('0.05');
         await DatasetNFT_.connect(users_.dtAdmin).setExtraFeePerPendingFragment(
-          extraFeePerPendingFragment
+          extraFeePerPendingFragment,
         );
 
         const testToken = await ethers.getContract('TestToken');
@@ -2071,13 +2084,13 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          false
+          false,
         );
 
         const fragmentAddress = await DatasetNFT_.fragments(datasetId);
         const DatasetFragment = (await ethers.getContractAt(
           'FragmentNFT',
-          fragmentAddress
+          fragmentAddress,
         )) as unknown as FragmentNFT;
 
         const tag = utils.encodeTag('dataset.schemas');
@@ -2089,13 +2102,13 @@ export default async function suite(): Promise<void> {
             datasetId,
             lastFragmentPendingId + 1n,
             users_.contributor.address,
-            tag
-          )
+            tag,
+          ),
         );
 
         await DatasetNFT_.connect(users_.datasetOwner).setPendingFragmentExtraFeeToDataset(
           datasetId,
-          true
+          true,
         );
 
         await expect(
@@ -2104,8 +2117,8 @@ export default async function suite(): Promise<void> {
             users_.contributor.address,
             tag,
             proposeSignature,
-            { value: extraFeePerPendingFragment }
-          )
+            { value: extraFeePerPendingFragment },
+          ),
         )
           .to.emit(DatasetFragment, 'FragmentPending')
           .withArgs(lastFragmentPendingId + 1n, tag)
@@ -2125,8 +2138,8 @@ export default async function suite(): Promise<void> {
             network.config.chainId!,
             datasetAddress,
             uuidHash,
-            users_.datasetOwner.address
-          )
+            users_.datasetOwner.address,
+          ),
         );
 
         const testToken = await ethers.getContract('TestToken');
@@ -2136,7 +2149,7 @@ export default async function suite(): Promise<void> {
 
         const extraFeePerPendingFragment = parseUnits('0.05');
         await DatasetNFT_.connect(users_.dtAdmin).setExtraFeePerPendingFragment(
-          extraFeePerPendingFragment
+          extraFeePerPendingFragment,
         );
 
         const defaultVerifierAddress = await (
@@ -2155,13 +2168,13 @@ export default async function suite(): Promise<void> {
           dsOwnerPercentage,
           [ZeroHash],
           [parseUnits('1', 18)],
-          true
+          true,
         );
 
         const fragmentAddress = await DatasetNFT_.fragments(datasetId);
         const DatasetFragment = (await ethers.getContractAt(
           'FragmentNFT',
-          fragmentAddress
+          fragmentAddress,
         )) as unknown as FragmentNFT;
 
         const tags = [utils.encodeTag('dataset.schemas'), utils.encodeTag('dataset.raws')];
@@ -2174,8 +2187,8 @@ export default async function suite(): Promise<void> {
             lastFragmentPendingId + 1n,
             lastFragmentPendingId + BigInt(tags.length),
             [users_.contributor.address, users_.contributor.address],
-            tags
-          )
+            tags,
+          ),
         );
 
         await expect(
@@ -2184,8 +2197,8 @@ export default async function suite(): Promise<void> {
             [users_.contributor.address, users_.contributor.address],
             tags,
             proposeSignature,
-            { value: extraFeePerPendingFragment * BigInt(tags.length) }
-          )
+            { value: extraFeePerPendingFragment * BigInt(tags.length) },
+          ),
         )
           .to.emit(DatasetFragment, 'FragmentPending')
           .withArgs(lastFragmentPendingId + 1n, tags[0])
@@ -2195,7 +2208,7 @@ export default async function suite(): Promise<void> {
           .withArgs(
             datasetId,
             users_.datasetOwner.address,
-            extraFeePerPendingFragment * BigInt(tags.length)
+            extraFeePerPendingFragment * BigInt(tags.length),
           );
       });
     });
