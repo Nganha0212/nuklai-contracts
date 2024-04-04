@@ -13,7 +13,7 @@ import { deployments, ethers, network } from 'hardhat';
 import { v4 as uuidv4 } from 'uuid';
 import { constants, signature } from './utils';
 import { APPROVED_TOKEN_ROLE, SIGNER_ROLE } from '../utils/constants';
-import { getUuidHash, getUint256FromBytes32 } from './utils/utils';
+import { getUuidHash, getUint256FromBytes32, encodeTag } from './utils/utils';
 import { getEvent } from './utils/events';
 import { setupUsers, Signer } from './utils/users';
 import { ONE_DAY } from './utils/constants';
@@ -719,6 +719,106 @@ export default async function suite(): Promise<void> {
           maxSubscriptionFee
         )
       ).to.be.revertedWith('ERC20: insufficient allowance');
+    });
+
+    it('Should tagCountAt() has tags and its counts after a subscription is made', async function () {
+      const tag1 = encodeTag('dataset.schemas');
+      const tag2 = encodeTag('dataset.rows');
+      const tag3 = encodeTag('dataset.columns');
+      const tag4 = encodeTag('dataset.metadata');
+      const tags = [tag1, tag2, tag3, tag4];
+
+      const fragmentAddress = await DatasetNFT_.fragments(datasetId_);
+      const DatasetFragment = (await ethers.getContractAt(
+        'FragmentNFT',
+        fragmentAddress
+      )) as unknown as FragmentNFT;
+      const lastFragmentPendingId = await DatasetFragment.lastFragmentPendingId();
+
+      const proposeFragmentsSignature = await users_.dtAdmin.signMessage(
+        signature.getDatasetFragmentProposeBatchMessage(
+          network.config.chainId!,
+          await DatasetNFT_.getAddress(),
+          datasetId_,
+          lastFragmentPendingId + 1n,
+          lastFragmentPendingId + BigInt(tags.length),
+          [
+            users_.datasetOwner.address,
+            users_.datasetOwner.address,
+            users_.datasetOwner.address,
+            users_.datasetOwner.address,
+          ],
+          [tag1, tag2, tag3, tag4]
+        )
+      );
+
+      await DatasetNFT_.connect(users_.datasetOwner).proposeManyFragments(
+        datasetId_,
+        [
+          users_.datasetOwner.address,
+          users_.datasetOwner.address,
+          users_.datasetOwner.address,
+          users_.datasetOwner.address,
+        ],
+        [tag1, tag2, tag3, tag4],
+        proposeFragmentsSignature
+      );
+
+      let snapshotId = await DatasetFragment.currentSnapshotId();
+      let [tagsFromFragment, counts] = await DatasetFragment.tagCountAt(snapshotId);
+
+      console.log('tagsFromFragment :>> ', tagsFromFragment);
+
+      expect(tagsFromFragment.includes(tag1)).to.be.true;
+      expect(tagsFromFragment.includes(tag2)).to.be.true;
+      expect(tagsFromFragment.includes(tag3)).to.be.true;
+      expect(tagsFromFragment.includes(tag4)).to.be.true;
+      expect(counts.length).to.equal(tags.length);
+
+      await DatasetDistributionManager_.connect(users_.datasetOwner).setTagWeights(
+        [ZeroHash],
+        [parseUnits('1', 18)]
+      );
+
+      await users_.subscriber.Token!.approve(
+        await DatasetSubscriptionManager_.getAddress(),
+        parseUnits('0.00864', 18)
+      );
+
+      await DatasetDistributionManager_.connect(users_.datasetOwner).setDatasetOwnerPercentage(
+        ethers.parseUnits('0.01', 18)
+      );
+
+      const feeAmount = parseUnits('0.00864', 18); // totalFee for 1 day & 1 consumer :: 0.00864 * 1 * 1 = 0.00864
+
+      await DatasetSubscriptionManager_.connect(users_.datasetOwner).setFee(
+        await users_.datasetOwner.Token!.getAddress(),
+        feeAmount
+      );
+
+      const [, maxSubscriptionFee] = await DatasetSubscriptionManager_.subscriptionFee(
+        datasetId_,
+        1,
+        1
+      );
+
+      await expect(
+        DatasetSubscriptionManager_.connect(users_.subscriber).subscribe(
+          datasetId_,
+          1, // 1 day
+          1,
+          maxSubscriptionFee
+        )
+      ).to.emit(DatasetSubscriptionManager_, 'SubscriptionPaid');
+
+      snapshotId = await DatasetFragment.currentSnapshotId();
+      [tagsFromFragment, counts] = await DatasetFragment.tagCountAt(snapshotId);
+
+      expect(tagsFromFragment.includes(tag1)).to.be.true;
+      expect(tagsFromFragment.includes(tag2)).to.be.true;
+      expect(tagsFromFragment.includes(tag3)).to.be.true;
+      expect(tagsFromFragment.includes(tag4)).to.be.true;
+      expect(counts.length).to.equal(tags.length);
     });
 
     // ----------------------------------------------------------------------------------------------
