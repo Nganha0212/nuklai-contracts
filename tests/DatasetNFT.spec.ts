@@ -406,22 +406,27 @@ export default async function suite(): Promise<void> {
       const feeAmount = parseUnits('0.1', 18);
       const dsOwnerPercentage = parseUnits('0.001', 18);
 
-      await expect(
-        DatasetFactory_.connect(users_.datasetOwner).mintAndConfigureDataset(
-          uuidHash,
-          users_.datasetOwner.address,
-          signedMessage,
-          defaultVerifierAddress,
-          await users_.datasetOwner.Token!.getAddress(),
-          feeAmount,
-          dsOwnerPercentage,
-          [ZeroHash],
-          [parseUnits('1', 18)],
-          false
-        )
-      )
+      const transaction = DatasetFactory_.connect(users_.datasetOwner).mintAndConfigureDataset(
+        uuidHash,
+        users_.datasetOwner.address,
+        signedMessage,
+        defaultVerifierAddress,
+        await users_.datasetOwner.Token!.getAddress(),
+        feeAmount,
+        dsOwnerPercentage,
+        [ZeroHash],
+        [parseUnits('1', 18)],
+        false
+      );
+      (await transaction).wait();
+      await expect(transaction)
         .to.emit(DatasetNFT_, 'ManagersConfigChange')
-        .withArgs(dt_Id)
+        .withArgs(
+          dt_Id,
+          await DatasetNFT_.distributionManager(dt_Id),
+          await DatasetNFT_.subscriptionManager(dt_Id),
+          await DatasetNFT_.verifierManager(dt_Id)
+        )
         .to.emit(DatasetNFT_, 'Transfer')
         .withArgs(ZeroAddress, await DatasetFactory_.getAddress(), dt_Id)
         .to.emit(DatasetNFT_, 'Transfer')
@@ -1154,28 +1159,43 @@ export default async function suite(): Promise<void> {
         ).deploy();
         const VerifierManager = await VerifierManagerFactory_.connect(users_.datasetOwner).deploy();
 
+        const distributionManagerAddr = await DistributionManager.getAddress();
+        const subscriptionManagerAddr = await SubscriptionManager.getAddress();
+        const verifierManagerAddr = await VerifierManager.getAddress();
+
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await SubscriptionManager.getAddress()
+          subscriptionManagerAddr
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await DistributionManager.getAddress()
+          distributionManagerAddr
         );
         await DatasetNFT_.connect(users_.dtAdmin).grantRole(
           constants.WHITELISTED_MANAGER_ROLE,
-          await VerifierManager.getAddress()
+          verifierManagerAddr
         );
 
-        await expect(
-          DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
-            subscriptionManager: await SubscriptionManager.getAddress(),
-            distributionManager: await DistributionManager.getAddress(),
-            verifierManager: await VerifierManager.getAddress(),
-          })
-        )
+        const transaction = DatasetNFT_.connect(users_.datasetOwner).setManagers(datasetId_, {
+          subscriptionManager: subscriptionManagerAddr,
+          distributionManager: distributionManagerAddr,
+          verifierManager: verifierManagerAddr,
+        });
+        (await transaction).wait();
+        await expect(transaction)
           .to.emit(DatasetNFT_, 'ManagersConfigChange')
-          .withArgs(datasetId_);
+          .withArgs(
+            datasetId_,
+            (
+              await DatasetNFT_.proxies(datasetId_)
+            ).distributionManager,
+            (
+              await DatasetNFT_.proxies(datasetId_)
+            ).subscriptionManager,
+            (
+              await DatasetNFT_.proxies(datasetId_)
+            ).verifierManager
+          );
       });
 
       it('Should revert set dataset nft managers if data set does not exists', async function () {
