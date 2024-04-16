@@ -187,7 +187,8 @@ contract FragmentNFT is IFragmentNFT, ERC721Upgradeable, ERC2771ContextExternalF
    */
   function tagCountAt(uint256 snapshotId) external view returns (bytes32[] memory tags_, uint256[] memory counts) {
     if (snapshotId >= _snapshots.length) revert BAD_SNAPSHOT_ID(snapshotId, _snapshots.length);
-    EnumerableMap.Bytes32ToUintMap storage tagCount = _snapshots[snapshotId].totalTagCount;
+    EnumerableMap.Bytes32ToUintMap storage tagCount = _snapshots[_findAccountSnapshotId(address(this), snapshotId)]
+      .totalTagCount;
     tags_ = tagCount.keys();
 
     uint256 length = tagCount.length();
